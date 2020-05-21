@@ -213,6 +213,9 @@ app.get("/application/name=/:app", (req, res,next) => {
     res.json(tree);
 })
 
-app.listen(8002, () => {
+
+var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1'
+
+app.listen(8002, server_ip_address, () => {
     console.log("Server running on port 8002");
 });

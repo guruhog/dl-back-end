@@ -134,7 +134,7 @@ app.get("/:id1/:id2/:id3", (req, res, next) =>{
     res.json(result3);
 });
 
-var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
+var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8001
 
 var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1'
 
