@@ -136,7 +136,7 @@ app.get("/:id1/:id2/:id3", (req, res, next) =>{
     res.json(result3);
 });
 
-var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8001
+var server_port = process.env.OCP_PORT1 || 8001
 
 var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1'
 
@@ -357,7 +357,8 @@ app2.get("/application/name=/:app", (req, res,next) => {
 
 
 //var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1'
+var server_port2 = process.env.OCP_PORT2 || 8002
 
 app2.listen(8002, server_ip_address, () => {
-    console.log("Server 2 running on " + server_ip_address + ", port 8002");
+    console.log("Server 2 running on " + server_ip_address + ", port " + server_port2);
 });
