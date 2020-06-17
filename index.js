@@ -6,36 +6,35 @@ var app2 = express();
 app.use(cors());
 app2.use(cors());
 
-
-
-//For the first screen//
+//Connecting to xlsx file
 var xlsx= require("xlsx");
-
 var wb=xlsx.readFile("Data Lineage - Data Model.xlsx");
 
+//Reading Sheets Value 
 var ws1=wb.Sheets["DL_Entities_Attributes"];
 var ws2=wb.Sheets["DL_Entities_Dependencies"];
 var ws3=wb.Sheets["DL_Info_Context_Apps"];
 var ws4=wb.Sheets["DL_Info_Context_Entities"];
 
+//Pushing the sheet's value in arrays 
 a=[]
 a.push(xlsx.utils.sheet_to_json(ws1))
 a.push(xlsx.utils.sheet_to_json(ws4))
 a.push(xlsx.utils.sheet_to_json(ws3))
 
+//Sending the JSON response for display of field,entity,application names on first page
 app.get("/", (req, res, next) => {
     res.json(a);
    });
 
+//Information Context part//
 
-
-//For second screen(Entity Part)//
+//Sending the JSON response for Information Context (Entity Part)
 var arr=xlsx.utils.sheet_to_json(ws4)
 
 app.get("/:username", (req, res, next) => {
 var id = req.params.username;
 var result=[];
-//console.log(id);
 arr.forEach(function (arrayItem) {
 if(arrayItem.DH_Entity_Name===id){
         result.push(arrayItem.ID);
@@ -60,10 +59,7 @@ if(arrayItem.DH_Entity_Name===id){
    });
 
 
-
-
-
-//For the second screen(Attribute Part)//
+//Sending the JSON response for Information Context (Attribute Part)
 var ws5=wb.Sheets["DL_Info_Context_Attributes"];
 var arr2=xlsx.utils.sheet_to_json(ws5);
 var arr3=xlsx.utils.sheet_to_json(ws1);
@@ -109,8 +105,7 @@ app.get("/:id1/:id2", (req, res, next) => {
     res.json(result2);
 });
 
-//For the second screen(Application Part)//
-
+//Sending the JSON response for Information Context (Application Part)
 var arr4=xlsx.utils.sheet_to_json(ws3);
 
 app.get("/:id1/:id2/:id3", (req, res, next) =>{
@@ -148,21 +143,26 @@ app.listen(server_port, server_ip_address, () => {
 var xlsx= require("xlsx");
 var wb=xlsx.readFile("Data Lineage - Data Model.xlsx");
 
+//Reading Sheets Value 
 var wsa1=wb.Sheets["DL_Info_Context_Entities"];
 var wsa2=wb.Sheets["DL_Entities_Dependencies"];
 var wsa3=wb.Sheets["DL_Entities_Attributes_Apps"];
 var wsa4=wb.Sheets["DL_Entities_Attributes"];
-    
+ 
+//Pushing the sheet's value in arrays 
 var arra1=xlsx.utils.sheet_to_json(wsa1)
 var arra2=xlsx.utils.sheet_to_json(wsa2)
 var arra3=xlsx.utils.sheet_to_json(wsa3)
 var arra4=xlsx.utils.sheet_to_json(wsa4)
 
+//Sending the JSON response for Data-Lineage (Entity Part)
 app2.get("/:entity", (req, res,next) => {
 
     var entity= req.params.entity;
     var root;
     var l2;
+
+    //Fetching the root(i.e source) value.
     arra1.forEach(function (arrayItem) {
         if(arrayItem.DH_Entity_Name===entity){
             if(arrayItem.DH_Schema_Name==="HORIZON_CDB"){
@@ -175,6 +175,7 @@ app2.get("/:entity", (req, res,next) => {
         }
     })
 
+    //Checking and setting for reference entity values.
     var refEntity={}
     var counter=1;
     var j;
@@ -187,6 +188,7 @@ app2.get("/:entity", (req, res,next) => {
 
     console.log(refEntity);
 
+    //Fetching the details(i.e name & ID) for consuming applications
     data={}
     var i=0;
     arra3.forEach(function (arrayItem) {
@@ -198,6 +200,7 @@ app2.get("/:entity", (req, res,next) => {
 
     const num=i;
     
+    //Setting all those fetched values in a tree like structure for Data Lineage display
     var tree=[{name:root,children:[{}]}]
 
     if(Object.keys(refEntity).length != 0)
@@ -240,7 +243,7 @@ app2.get("/:entity", (req, res,next) => {
     res.json(ouput);
 });
 
-
+//Sending the JSON response for Data-Lineage (Attribute Part)
 app2.get("/:entity/:attribute", (req, res,next) => {
 
     var entity=req.params.entity;
@@ -249,6 +252,7 @@ app2.get("/:entity/:attribute", (req, res,next) => {
     var l1;
     var l2=attribute;
     
+    //Fetching the root(i.e source) value.
     arra4.forEach(function (arrayItem) {
         if(arrayItem.DH_Entity_Name===entity){
             if(arrayItem.DH_Attribute_Name===attribute){
@@ -263,6 +267,7 @@ app2.get("/:entity/:attribute", (req, res,next) => {
         }
     })
 
+    //Fetching the details(i.e name & ID) for consuming applications
     data={}
     var i=0;
     arra3.forEach(function (arrayItem) {
@@ -274,6 +279,7 @@ app2.get("/:entity/:attribute", (req, res,next) => {
 
     var num=i;
 
+    //Setting all those fetched values in a tree like structure for Data Lineage display
     var tree=[{name:root,children:[{}]}]
     tree[0].children[0].name=l1
     tree[0].children[0].children=[{}]
@@ -299,6 +305,7 @@ app2.get("/:entity/:attribute", (req, res,next) => {
     
 }); 
 
+//Sending the JSON response for Data-Lineage (Application Part)
 app2.get("/application/name=/:app", (req, res,next) => {
     var app=req.params.app;
     var root=app;
@@ -306,6 +313,7 @@ app2.get("/application/name=/:app", (req, res,next) => {
     var wsa5=wb.Sheets["DL_Info_Context_Apps"];
     var arra5=xlsx.utils.sheet_to_json(wsa5)
     
+    //Fetching the User ID of the given application
     arra5.forEach(function (arrayItem) {
         if(arrayItem.Application_Name===app){
             l1=arrayItem.Application_User_ID;
@@ -313,6 +321,7 @@ app2.get("/application/name=/:app", (req, res,next) => {
         }
     })
 
+    //Fetching the list of all the entities from which this application is consuming
     var data ={}
     arra3.forEach(function (arrayItem) {
         if(arrayItem.Application_Name===app){
@@ -329,6 +338,8 @@ app2.get("/application/name=/:app", (req, res,next) => {
     for(var it in data){
         data[it]=Array.from(data[it])
     }
+
+    //Setting all those fetched values in a tree like structure for Data Lineage display
     var tree=[{name:root,children:[{}]}]
     tree[0].children[0].name=l1
     tree[0].children[0].children=[]
